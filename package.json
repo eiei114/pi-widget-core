@@ -1,0 +1,52 @@
+{
+  "name": "pi-widget-core",
+  "version": "0.1.0",
+  "description": "Maintainer-facing core library for Pi widget host/provider protocol, presence switching, and shared runtime helpers.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Keisu",
+  "keywords": [
+    "pi",
+    "widget",
+    "protocol",
+    "sdk",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eiei114/pi-widget-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eiei114/pi-widget-core/issues"
+  },
+  "homepage": "https://github.com/eiei114/pi-widget-core#readme",
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md"
+  ],
+  "exports": {
+    "./protocol": "./src/protocol.ts",
+    "./provider": "./src/provider.ts",
+    "./host": "./src/host.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "ci": "npm run typecheck && npm test && npm run pack:check",
+    "pack:check": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.3"
+  }
+}
