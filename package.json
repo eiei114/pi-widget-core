@@ -1,6 +1,6 @@
 {
   "name": "pi-widget-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Maintainer-facing core library for Pi widget host/provider protocol, presence switching, and shared runtime helpers.",
   "type": "module",
   "license": "MIT",
