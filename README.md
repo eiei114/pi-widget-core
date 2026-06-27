@@ -22,7 +22,7 @@ Use it when you need:
 ## Features
 
 - **Protocol surface** — shared `ProviderEntry` types, in-process host registry, and host presence signals
-- **Provider runtime** — `createProviderRuntime()` handles host-owned publish vs standalone fallback with one API
+- **Provider runtime** — `registerProvider()` and `createProviderRuntime()` handle host-owned publish vs standalone fallback
 - **Host helpers** — mark/clear host presence, list provider entries, and subscribe to registry changes
 - **Subpath exports** — import only the surface your package needs: `protocol`, `provider`, or `host`
 - **TypeScript-first** — ships typed `.ts` sources for direct consumption by extension packages
@@ -50,20 +50,32 @@ Import the subpath that matches your role:
 import { publishProviderEntry, type ProviderEntry } from "pi-widget-core/protocol";
 
 // Provider-side runtime (host-aware publish + standalone fallback)
-import { createProviderRuntime } from "pi-widget-core/provider";
+import { registerProvider } from "pi-widget-core/provider";
+import type { ProviderEntry } from "pi-widget-core/protocol";
 
 // Host-side presence and registry helpers
 import { markHostPresent, listProviderEntries } from "pi-widget-core/host";
 ```
 
-**Widget provider** — create a runtime, push updates, and let the library switch between host-owned and standalone display:
+**Widget provider** — register callbacks for rendered lines and host presence, then call `refresh()` when your widget state changes:
 
 ```ts
-import { createProviderRuntime } from "pi-widget-core/provider";
+import { registerProvider } from "pi-widget-core/provider";
 
-const runtime = createProviderRuntime({
-  providerId: "my-widget",
+const provider = registerProvider({
+  id: "my-widget",
   widgetId: "widget-my-widget",
+  tags: ["music"],
+  priority: 10,
+  ttlMs: 30_000,
+  getUpdatedAt: () => new Date().toISOString(),
+  getRenderedLines: () => ({
+    available: true,
+    lines: ["Now playing: Example Track"],
+  }),
+  onHostPresenceChange: (hostPresent) => {
+    // optional: react when Host appears or disappears
+  },
   sink: {
     setWidget: (_id, lines) => {
       // render lines in your extension widget when no host is present
@@ -71,16 +83,14 @@ const runtime = createProviderRuntime({
   },
 });
 
-runtime.update({
-  available: true,
-  lines: ["Now playing: Example Track"],
-  updatedAt: new Date().toISOString(),
-  tags: ["music"],
-});
+// when your snapshot/cache changes
+provider.refresh();
 
-// later
-runtime.stop();
+// when shutting down
+provider.stop();
 ```
+
+For lower-level control, `createProviderRuntime()` accepts explicit `update()` payloads instead of callback getters.
 
 **Widget host** — mark presence and read published provider entries:
 
@@ -102,8 +112,8 @@ unsubscribe();
 
 | Subpath | Purpose |
 |---|---|
-| `pi-widget-core/protocol` | Shared protocol types, registry, and presence primitives |
-| `pi-widget-core/provider` | `createProviderRuntime()` and provider-side helpers |
+| `pi-widget-core/protocol` | Protocol v1 types (`ProviderEntry`, `WidgetHostRegistry`), registry, and presence primitives |
+| `pi-widget-core/provider` | `registerProvider()`, `createProviderRuntime()`, and provider-side helpers |
 | `pi-widget-core/host` | Host presence and registry read/subscribe helpers |
 
 ## Package contents
@@ -111,7 +121,7 @@ unsubscribe();
 | Path | Purpose |
 |---|---|
 | `src/protocol.ts` | Protocol types, host registry, and presence store |
-| `src/provider.ts` | Provider runtime with host-aware publish and standalone fallback |
+| `src/provider.ts` | `registerProvider()`, `createProviderRuntime()`, and provider-side helpers |
 | `src/host.ts` | Host-facing registry and presence helpers |
 | `README.md` | Public entrypoint documentation |
 | `CHANGELOG.md` | Version history |
