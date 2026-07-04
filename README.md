@@ -6,6 +6,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/pi-widget-core.svg)](https://www.npmjs.com/package/pi-widget-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Trusted Publishing](https://img.shields.io/badge/npm-Trusted%20Publishing-blue.svg)](.github/workflows/publish.yml)
+<a href="https://buymeacoffee.com/ekawano114m"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="217" height="60"></a>
 
 > Shared TypeScript library for Pi widget host/provider protocol, presence switching, and provider runtime helpers.
 
