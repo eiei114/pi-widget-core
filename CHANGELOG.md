@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.2
+
 - Add Buy Me a Coffee sponsor button to README and native GitHub funding link via `.github/FUNDING.yml`.
 
 ## 0.1.1
