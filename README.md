@@ -39,7 +39,7 @@ npm install pi-widget-core
 Pin a specific version when you want reproducible installs:
 
 ```bash
-npm install pi-widget-core@0.1.2
+npm install pi-widget-core@0.1.3
 ```
 
 ## Quick start
