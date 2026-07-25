@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.3
+
 ### Changed
 
 - Bump package version to `0.1.3` for the next patch release.
