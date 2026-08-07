@@ -96,7 +96,7 @@ For lower-level control, `createProviderRuntime()` accepts explicit `update()` p
 **Widget host** — mark presence and read published provider entries:
 
 ```ts
-import { markHostPresent, listProviderEntries, subscribeToProviderEntries } from "pi-widget-core/host";
+import { markHostPresent, clearHostPresent, listProviderEntries, subscribeToProviderEntries } from "pi-widget-core/host";
 
 markHostPresent();
 
@@ -107,6 +107,7 @@ const unsubscribe = subscribeToProviderEntries(() => {
 
 // when shutting down
 unsubscribe();
+clearHostPresent();
 ```
 
 ### Export surface
