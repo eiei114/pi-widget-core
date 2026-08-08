@@ -22,3 +22,14 @@ test("CHANGELOG documents the released package.json version", () => {
     "CHANGELOG should include a section for the current package.json version",
   );
 });
+
+test("README host quick start documents clearHostPresent alongside markHostPresent", () => {
+  assert.match(readme, /mark\/clear host presence/i, "README features should mention mark/clear host presence");
+
+  const hostExample = readme.match(/\*\*Widget host\*\*[\s\S]*?```ts([\s\S]*?)```/);
+  assert.ok(hostExample, "README should include a widget host quick start");
+
+  const example = hostExample[1];
+  assert.match(example, /markHostPresent\(\)/, "host quick start should call markHostPresent()");
+  assert.match(example, /clearHostPresent\(\)/, "host quick start should call clearHostPresent() on shutdown");
+});
