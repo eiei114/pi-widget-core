@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.4
+
+### Changed
+
+- Merge the 2026-08-22 managed OSS dependency and maintenance PR batch.
+
 ## 0.1.3
 
 ### Changed
@@ -19,4 +25,3 @@
 ## 0.1.0
 
 - Initial local implementation of shared widget protocol, host presence switching, and provider runtime helpers.
-
