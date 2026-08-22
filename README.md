@@ -52,7 +52,6 @@ import { publishProviderEntry, type ProviderEntry } from "pi-widget-core/protoco
 
 // Provider-side runtime (host-aware publish + standalone fallback)
 import { registerProvider } from "pi-widget-core/provider";
-import type { ProviderEntry } from "pi-widget-core/protocol";
 
 // Host-side presence and registry helpers
 import { markHostPresent, listProviderEntries } from "pi-widget-core/host";

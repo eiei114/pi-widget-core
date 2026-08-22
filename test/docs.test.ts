@@ -23,6 +23,18 @@ test("CHANGELOG documents the released package.json version", () => {
   );
 });
 
+test("README subpath import overview avoids duplicate ProviderEntry imports", () => {
+  const importOverview = readme.match(/Import the subpath that matches your role:[\s\S]*?```ts\n([\s\S]*?)```/);
+  assert.ok(importOverview, "README should include the subpath import overview");
+
+  const providerEntryReferences = importOverview[1].match(/\bProviderEntry\b/g) ?? [];
+  assert.equal(
+    providerEntryReferences.length,
+    1,
+    "subpath import overview should not declare ProviderEntry more than once when copied as one module",
+  );
+});
+
 test("README host quick start documents clearHostPresent alongside markHostPresent", () => {
   assert.match(readme, /mark\/clear host presence/i, "README features should mention mark/clear host presence");
 
