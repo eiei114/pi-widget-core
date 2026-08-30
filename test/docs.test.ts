@@ -4,7 +4,10 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const packageJson = JSON.parse(readFileSync(`${root}/package.json`, "utf8")) as { version: string };
+const packageJson = JSON.parse(readFileSync(`${root}/package.json`, "utf8")) as {
+  version: string;
+  engines?: { node?: string };
+};
 const readme = readFileSync(`${root}/README.md`, "utf8");
 const changelog = readFileSync(`${root}/CHANGELOG.md`, "utf8");
 
@@ -32,6 +35,22 @@ test("README subpath import overview avoids duplicate ProviderEntry imports", ()
     providerEntryReferences.length,
     1,
     "subpath import overview should not declare ProviderEntry more than once when copied as one module",
+  );
+});
+
+test("README Development documents package.json Node.js engine requirement", () => {
+  const nodeEngine = packageJson.engines?.node;
+  assert.ok(nodeEngine, "package.json should declare engines.node");
+
+  const development = readme.match(/## Development[\s\S]*?(?=## |$)/);
+  assert.ok(development, "README should include a Development section");
+
+  const minimumMajor = nodeEngine.match(/(\d+)/)?.[1];
+  assert.ok(minimumMajor, "engines.node should include a numeric minimum version");
+  assert.match(
+    development[0],
+    new RegExp(`Node\\.js\\s+${minimumMajor}`, "i"),
+    "Development section should document the Node.js engine requirement from package.json",
   );
 });
 
