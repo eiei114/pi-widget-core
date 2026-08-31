@@ -131,6 +131,8 @@ clearHostPresent();
 
 ## Development
 
+Requires Node.js 20 or later (see `engines.node` in `package.json`).
+
 ```bash
 npm install
 npm run ci
