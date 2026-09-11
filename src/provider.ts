@@ -1,6 +1,7 @@
 import {
   isHostPresent,
   normalizeProviderEntry,
+  normalizeProviderId,
   publishProviderEntry,
   removeProviderEntry,
   subscribeToHostPresence,
@@ -86,21 +87,12 @@ function resolveRenderedState(rendered: ProviderRenderedState): { available: boo
   };
 }
 
-/** Trims and validates a provider id before runtime use. */
-function normalizeRuntimeProviderId(providerId: string): string {
-  const normalized = providerId.trim();
-  if (normalized.length === 0) {
-    throw new Error("providerId is required");
-  }
-  return normalized;
-}
-
 /**
  * Registers a widget provider using callback getters and host-presence hooks.
  * Publishes to the host registry when a host is present, otherwise renders standalone.
  */
 export function registerProvider(options: RegisterProviderOptions): RegisteredProvider {
-  const providerId = normalizeRuntimeProviderId(options.id);
+  const providerId = normalizeProviderId(options.id);
   const runtime = createProviderRuntime({
     providerId,
     widgetId: options.widgetId,
@@ -144,7 +136,7 @@ export function registerProvider(options: RegisterProviderOptions): RegisteredPr
  * Prefer {@link registerProvider} when provider state is callback-driven.
  */
 export function createProviderRuntime(options: ProviderRuntimeOptions): ProviderRuntime {
-  const providerId = normalizeRuntimeProviderId(options.providerId);
+  const providerId = normalizeProviderId(options.providerId);
   let hostPresent = isHostPresent();
   let latest: ProviderEntry | undefined;
   let stopped = false;
