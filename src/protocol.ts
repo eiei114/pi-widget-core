@@ -54,11 +54,16 @@ function normalizeIsoDate(value: unknown): string {
   return date.toISOString();
 }
 
-export function normalizeProviderEntry(entry: ProviderEntry): ProviderEntry {
-  const providerId = trimNonEmpty(entry.providerId);
-  if (!providerId) {
+export function normalizeProviderId(providerId: unknown): string {
+  const normalized = trimNonEmpty(providerId);
+  if (!normalized) {
     throw new Error("providerId is required");
   }
+  return normalized;
+}
+
+export function normalizeProviderEntry(entry: ProviderEntry): ProviderEntry {
+  const providerId = normalizeProviderId(entry.providerId);
 
   return {
     providerId,

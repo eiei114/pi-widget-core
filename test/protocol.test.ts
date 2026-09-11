@@ -4,6 +4,7 @@ import {
   clearProviderEntries,
   getWidgetHostRegistry,
   normalizeProviderEntry,
+  normalizeProviderId,
   setHostPresenceActive,
   subscribeToHostPresence,
 } from "../src/protocol.ts";
@@ -53,6 +54,12 @@ test("registry publishes, dedupes, lists, and removes normalized entries", () =>
 
   dispose();
   clearProviderEntries();
+});
+
+test("normalizeProviderId trims and rejects empty ids", () => {
+  assert.equal(normalizeProviderId(" demo "), "demo");
+  assert.throws(() => normalizeProviderId("   "), /providerId is required/);
+  assert.throws(() => normalizeProviderId(""), /providerId is required/);
 });
 
 test("normalizeProviderEntry applies boundary normalization", () => {
