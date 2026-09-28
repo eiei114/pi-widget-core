@@ -4,41 +4,9 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
-## [Unreleased]
-
 ## [0.1.9] - 2026-09-27
 
 - chore: periodic patch bump after 7+ days without npm publish
-
-
-
-
-
-## Unreleased
-
-## 0.1.4
-
-### Changed
-
-- Merge the 2026-08-22 managed OSS dependency and maintenance PR batch.
-
-## 0.1.3
-
-### Changed
-
-- Bump package version to `0.1.3` for the next patch release.
-
-## 0.1.2
-
-- Add Buy Me a Coffee sponsor button to README and native GitHub funding link via `.github/FUNDING.yml`.
-
-## 0.1.1
-
-- Align README with the current Pi OSS template baseline for shared libraries (install, quick start, package contents, release, and security sections).
-
-## 0.1.0
-
-- Initial local implementation of shared widget protocol, host presence switching, and provider runtime helpers.
 ## [0.1.8] - 2026-09-28
 
 - chore: periodic patch bump after 7+ days without npm publish
@@ -51,3 +19,5 @@ This project follows semantic versioning.
 ## [0.1.5] - 2026-09-28
 
 - chore: periodic patch bump after 7+ days without npm publish
+## Unreleased
+
