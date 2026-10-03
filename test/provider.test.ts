@@ -45,6 +45,33 @@ test("provider runtime switches between standalone render and host-owned publish
   clearHostPresent();
 });
 
+test("registerProvider adapts array output and Date timestamps for runtime updates", () => {
+  clearProviderEntries();
+  clearHostPresent();
+
+  const provider = registerProvider({
+    id: "date-provider",
+    getUpdatedAt: () => new Date("2026-06-15T12:00:00Z"),
+    getRenderedLines: () => ["hello"],
+  });
+
+  markHostPresent();
+  assert.deepEqual(listProviderEntries()[0], {
+    providerId: "date-provider",
+    available: true,
+    lines: ["hello"],
+    updatedAt: "2026-06-15T12:00:00.000Z",
+    priority: 0,
+    tags: undefined,
+    mode: undefined,
+    ttlMs: undefined,
+  });
+
+  provider.stop();
+  clearProviderEntries();
+  clearHostPresent();
+});
+
 test("provider runtime keeps unavailable state in host registry and clears standalone widget", () => {
   clearProviderEntries();
   clearHostPresent();

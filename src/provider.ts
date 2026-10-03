@@ -87,6 +87,20 @@ function resolveRenderedState(rendered: ProviderRenderedState): { available: boo
   };
 }
 
+/** Adapts callback-driven provider options to the lower-level runtime update shape. */
+function resolveProviderUpdate(options: RegisterProviderOptions, providerId: string): ProviderRuntimeUpdate {
+  const rendered = resolveRenderedState(options.getRenderedLines());
+  return {
+    providerId,
+    available: rendered.available,
+    lines: rendered.lines,
+    updatedAt: resolveUpdatedAt(options.getUpdatedAt()),
+    tags: resolveProviderOption(options.tags, undefined),
+    priority: resolveProviderOption(options.priority, undefined),
+    ttlMs: resolveProviderOption(options.ttlMs, undefined),
+  };
+}
+
 /**
  * Registers a widget provider using callback getters and host-presence hooks.
  * Publishes to the host registry when a host is present, otherwise renders standalone.
@@ -105,18 +119,7 @@ export function registerProvider(options: RegisterProviderOptions): RegisteredPr
       })
     : undefined;
 
-  const refresh = () => {
-    const rendered = resolveRenderedState(options.getRenderedLines());
-    return runtime.update({
-      providerId,
-      available: rendered.available,
-      lines: rendered.lines,
-      updatedAt: resolveUpdatedAt(options.getUpdatedAt()),
-      tags: resolveProviderOption(options.tags, undefined),
-      priority: resolveProviderOption(options.priority, undefined),
-      ttlMs: resolveProviderOption(options.ttlMs, undefined),
-    });
-  };
+  const refresh = () => runtime.update(resolveProviderUpdate(options, providerId));
 
   refresh();
 
