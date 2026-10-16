@@ -27,23 +27,15 @@ jobs:
         id: check
         shell: bash
         run: |
-          BEFORE="$(git rev-parse HEAD^)"
           CURRENT_VERSION=$(node -p "require('./package.json').version")
+          PREVIOUS_VERSION=$(node scripts/previous-package-version.mjs)
           TAG="v${CURRENT_VERSION}"
 
-          if [ -z "$BEFORE" ] || printf '%s' "$BEFORE" | grep -Eq '^0+$'; then
-            echo "No previous commit is available; skipping auto release."
+          if [ -z "$PREVIOUS_VERSION" ]; then
+            echo "No prior package version is available; skipping auto release."
             echo "released=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
-          if ! git cat-file -e "${BEFORE}:package.json" 2>/dev/null; then
-            echo "Previous package.json is not available; skipping auto release."
-            echo "released=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          PREVIOUS_VERSION=$(git show "${BEFORE}:package.json" | node -e "let input=''; process.stdin.on('data', c => input += c); process.stdin.on('end', () => console.log(JSON.parse(input).version || ''));")
 
           if [ "$CURRENT_VERSION" = "$PREVIOUS_VERSION" ]; then
             echo "package.json version did not change (${CURRENT_VERSION}); skipping."

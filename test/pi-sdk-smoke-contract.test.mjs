@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { behaviorAssertions, parseJsonLines, VERIFICATION_CONTRACT } from "../scripts/pi-sdk-smoke-contract.mjs";
+import {
+  behaviorAssertions, hasMalformedRpcStdout, parseJsonLines, smokeCasePassed, VERIFICATION_CONTRACT,
+} from "../scripts/pi-sdk-smoke-contract.mjs";
 
 const status = { type: "extension_ui_request", method: "setStatus", statusKey: "widget-core", statusText: "Pi widget core loaded" };
 const prompt = { type: "response", command: "prompt", success: true, data: { disposition: "handled" } };
@@ -24,6 +26,16 @@ test("JSON-lines parser rejects non-empty malformed RPC stdout", () => {
       message: /Invalid JSON in RPC stdout line 2/,
     });
   }
+});
+
+test("malformed stdout from the first reload process fails even when the second succeeds", () => {
+  const firstProcess = { stdoutProtocolError: new SyntaxError("Invalid JSON in RPC stdout line 1") };
+  const secondProcess = { stdoutProtocolError: undefined };
+  const malformed = hasMalformedRpcStdout(firstProcess, secondProcess);
+
+  assert.equal(malformed, true);
+  assert.equal(smokeCasePassed({ processExited: true, exit_code: 0, hasUnhandledError: false,
+    hasLoadError: false, hasMalformedRpcStdout: malformed, assertions: [{ passed: true }] }), false);
 });
 
 test("positive observations pass for extension load, feature, handled error, reload, and native shell", () => {

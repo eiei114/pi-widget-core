@@ -19,6 +19,16 @@ export function parseJsonLines(output) {
   });
 }
 
+export function hasMalformedRpcStdout(firstProcess, result) {
+  return Boolean(firstProcess.stdoutProtocolError || result.stdoutProtocolError);
+}
+
+export function smokeCasePassed({ processExited, exit_code, hasUnhandledError, hasLoadError,
+  hasMalformedRpcStdout: malformedRpcStdout, assertions }) {
+  return processExited && exit_code === 0 && !hasUnhandledError && !hasLoadError
+    && !malformedRpcStdout && assertions.every((item) => item.passed);
+}
+
 function assertion(id, expected, observed, passed) {
   return { id, expected, observed: JSON.stringify(observed), passed: passed === true };
 }

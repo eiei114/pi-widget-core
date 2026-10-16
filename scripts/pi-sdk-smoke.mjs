@@ -3,8 +3,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import {
-  behaviorAssertions, EXTENSION_LOAD_ERROR_PATTERN, parseJsonLines, SDK_VERSIONS,
-  UNHANDLED_ERROR_PATTERN, VERIFICATION_CONTRACT,
+  behaviorAssertions, EXTENSION_LOAD_ERROR_PATTERN, hasMalformedRpcStdout, parseJsonLines,
+  SDK_VERSIONS, smokeCasePassed, UNHANDLED_ERROR_PATTERN, VERIFICATION_CONTRACT,
 } from "./pi-sdk-smoke-contract.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -47,6 +47,7 @@ function run(name, executable, args, input) {
       exit_code: result.status ?? 1,
       processExited: result.status !== null && result.status !== undefined && !result.error,
       responses,
+      stdoutProtocolError,
     };
   };
   const firstProcess = launch();
@@ -58,7 +59,7 @@ function run(name, executable, args, input) {
   const exit_code = result.exit_code;
   const processExited = result.processExited && (name !== "reload_cleanup" || firstProcess.processExited);
   const responses = result.responses;
-  const hasMalformedRpcStdout = !!(firstProcess.stdoutProtocolError || result.stdoutProtocolError);
+  const malformedRpcStdout = hasMalformedRpcStdout(firstProcess, result);
   const assertions = behaviorAssertions(name, { responses, fullOutput, exit_code, processExited,
     firstExitCode: firstProcess.exit_code, firstProcessExited: firstProcess.processExited,
     processCount: name === "reload_cleanup" ? 2 : 1,
@@ -69,13 +70,13 @@ function run(name, executable, args, input) {
     name,
     command: "npm run smoke:pi",
     exit_code,
-    passed: processExited && exit_code === 0 && !hasUnhandledError && !hasLoadError
-      && !hasMalformedRpcStdout && assertions.every((item) => item.passed),
+    passed: smokeCasePassed({ processExited, exit_code, hasUnhandledError, hasLoadError,
+      hasMalformedRpcStdout: malformedRpcStdout, assertions }),
     evidence: fullOutput.slice(-6000) || "No output captured",
     assertions,
     hasUnhandledError,
     hasLoadError,
-    hasMalformedRpcStdout,
+    hasMalformedRpcStdout: malformedRpcStdout,
   };
 }
 
