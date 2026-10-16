@@ -50,7 +50,8 @@ function run(name, executable, args, input) {
   const responses = result.responses;
   const assertions = behaviorAssertions(name, { responses, fullOutput, exit_code, processExited,
     firstExitCode: firstProcess.exit_code, firstProcessExited: firstProcess.processExited,
-    processCount: name === "reload_cleanup" ? 2 : 1 });
+    processCount: name === "reload_cleanup" ? 2 : 1,
+    firstProcessOutput: firstProcess.output, secondProcessOutput: result.output });
   const hasUnhandledError = UNHANDLED_ERROR_PATTERN.test(fullOutput);
   const hasLoadError = EXTENSION_LOAD_ERROR_PATTERN.test(fullOutput);
   return {

@@ -48,11 +48,11 @@ export default function (pi: ExtensionAPI): void {
 
   pi.on("session_shutdown", async () => {
     provider?.stop();
+    if (listProviderEntries().some((entry) => entry.providerId === providerId)) {
+      throw new Error("pi-widget-core smoke provider was not disposed by stop");
+    }
     provider = undefined;
     clearHostPresent();
-    if (listProviderEntries().some((entry) => entry.providerId === providerId)) {
-      throw new Error("pi-widget-core smoke provider was not disposed");
-    }
     clearProviderEntries();
     console.log("[pi-widget-core-smoke] clean_shutdown");
   });

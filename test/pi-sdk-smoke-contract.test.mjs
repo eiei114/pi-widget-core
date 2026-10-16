@@ -7,9 +7,10 @@ const prompt = { type: "response", command: "prompt", success: true, data: { dis
 const entry = { providerId: "pi-widget-core-sdk-smoke", available: true, lines: ["widget core provider is live"] };
 const notification = { type: "extension_ui_request", method: "notify", message: `pi-widget-core:${JSON.stringify(entry)}` };
 const cleanOutput = "[pi-widget-core-smoke] clean_shutdown\n[pi-widget-core-smoke] clean_shutdown";
-const observed = (responses = [status, prompt, notification], fullOutput = cleanOutput, exit_code = 0, processExited = true) =>
+const observed = (responses = [status, prompt, notification], fullOutput = cleanOutput, exit_code = 0,
+  processExited = true, firstProcessOutput = fullOutput, secondProcessOutput = fullOutput) =>
   ({ responses, fullOutput, exit_code, processExited, firstExitCode: exit_code,
-    firstProcessExited: processExited, processCount: 2 });
+    firstProcessExited: processExited, processCount: 2, firstProcessOutput, secondProcessOutput });
 
 test("contract ID and JSON-lines parser handle LF/CRLF and ignore non-JSON lines", () => {
   assert.equal(VERIFICATION_CONTRACT, "pi-sdk-behavior-v2");
@@ -47,6 +48,11 @@ test("reload requires the second host registration, real feature response, and d
   }
   assert.equal(behaviorAssertions("reload_cleanup", observed([status, prompt, notification], "", 0))[2].passed, false);
   assert.equal(behaviorAssertions("reload_cleanup", observed([status, prompt, notification], cleanOutput, 0, false))[2].passed, false);
+  const firstProcessHasTwoMarkers = "[pi-widget-core-smoke] clean_shutdown\n".repeat(2);
+  const secondProcessHasNone = "";
+  const unevenCleanup = observed([status, prompt, notification], `${firstProcessHasTwoMarkers}${secondProcessHasNone}`,
+    0, true, firstProcessHasTwoMarkers, secondProcessHasNone);
+  assert.equal(behaviorAssertions("reload_cleanup", unevenCleanup)[2].passed, false);
 });
 
 test("host shell checks exact version, actual process exit, and extension load detects wrong registration", () => {

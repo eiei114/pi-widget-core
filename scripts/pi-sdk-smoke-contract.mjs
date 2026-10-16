@@ -39,14 +39,16 @@ function handled(prompt) {
 export function behaviorAssertions(name, {
   responses, fullOutput, exit_code, processExited, firstExitCode = exit_code,
   firstProcessExited = processExited, processCount = 1,
+  firstProcessOutput = fullOutput, secondProcessOutput = fullOutput,
 }) {
   const status = responses.find((row) => row?.type === "extension_ui_request"
     && row.method === "setStatus" && row.statusKey === "widget-core"
     && row.statusText === "Pi widget core loaded");
   const prompt = promptResponse(responses);
   const notification = featureNotification(responses);
-  const cleanupMarkerCount = (fullOutput.match(/\[pi-widget-core-smoke\] clean_shutdown/g) ?? []).length;
-  const cleanShutdown = cleanupMarkerCount >= processCount
+  const firstCleanupMarkerCount = (firstProcessOutput.match(/\[pi-widget-core-smoke\] clean_shutdown/g) ?? []).length;
+  const secondCleanupMarkerCount = (secondProcessOutput.match(/\[pi-widget-core-smoke\] clean_shutdown/g) ?? []).length;
+  const cleanShutdown = firstCleanupMarkerCount >= 1 && secondCleanupMarkerCount >= 1
     && !UNHANDLED_ERROR_PATTERN.test(fullOutput);
 
   if (name === "extension_load") {
@@ -84,7 +86,8 @@ export function behaviorAssertions(name, {
           && entry?.available === true && JSON.stringify(entry?.lines) === JSON.stringify(["widget core provider is live"])),
       assertion("clean_shutdown", "The second process exits after disposing the provider without shutdown errors",
         { first_exit_code: firstExitCode, first_process_exited: firstProcessExited, exit_code, processExited,
-          processCount, cleanupMarkerCount, shutdownErrors: UNHANDLED_ERROR_PATTERN.test(fullOutput) },
+          processCount, firstCleanupMarkerCount, secondCleanupMarkerCount,
+          shutdownErrors: UNHANDLED_ERROR_PATTERN.test(fullOutput) },
         firstExitCode === 0 && firstProcessExited && exit_code === 0 && processExited
           && processCount === 2 && cleanShutdown),
     ];
