@@ -12,9 +12,18 @@ const observed = (responses = [status, prompt, notification], fullOutput = clean
   ({ responses, fullOutput, exit_code, processExited, firstExitCode: exit_code,
     firstProcessExited: processExited, processCount: 2, firstProcessOutput, secondProcessOutput });
 
-test("contract ID and JSON-lines parser handle LF/CRLF and ignore non-JSON lines", () => {
+test("contract ID and JSON-lines parser handle LF/CRLF and blank lines", () => {
   assert.equal(VERIFICATION_CONTRACT, "pi-sdk-behavior-v2");
-  assert.deepEqual(parseJsonLines(`noise\r\n${JSON.stringify(prompt)}\n\n`), [prompt]);
+  assert.deepEqual(parseJsonLines(`${JSON.stringify(prompt)}\r\n\n`), [prompt]);
+});
+
+test("JSON-lines parser rejects non-empty malformed RPC stdout", () => {
+  for (const malformed of ["not json", '{"truncated":']) {
+    assert.throws(() => parseJsonLines(`${JSON.stringify(prompt)}\n${malformed}\n`), {
+      name: "SyntaxError",
+      message: /Invalid JSON in RPC stdout line 2/,
+    });
+  }
 });
 
 test("positive observations pass for extension load, feature, handled error, reload, and native shell", () => {

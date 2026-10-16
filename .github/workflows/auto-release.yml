@@ -1,10 +1,13 @@
 name: Auto Release
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - package.json
+  workflow_dispatch:
+    inputs:
+      release_authorized:
+        description: Explicitly authorize creating a version tag/release and triggering npm publication
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   actions: write
@@ -12,6 +15,7 @@ permissions:
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main' && inputs.release_authorized
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +27,7 @@ jobs:
         id: check
         shell: bash
         run: |
-          BEFORE="${{ github.event.before }}"
+          BEFORE="$(git rev-parse HEAD^)"
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           TAG="v${CURRENT_VERSION}"
 
@@ -78,6 +82,6 @@ jobs:
         shell: bash
         run: |
           TAG="${{ steps.check.outputs.tag }}"
-          gh workflow run publish.yml --ref "$TAG" -f ref="$TAG"
+          gh workflow run publish.yml --ref "$TAG" -f ref="$TAG" -f publish_authorized=true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

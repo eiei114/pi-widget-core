@@ -17,12 +17,12 @@
       "command": "npm run smoke:pi",
       "exit_code": 0,
       "passed": true,
-      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"5b24a11e-2d7a-4083-bd84-4a85471fd0cb\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"3dc230b4-174a-4072-a937-f17836972411\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"bd37c963-6ea9-4cbe-874a-79e156ac31da\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"f4eb7fe3-2ef6-4d98-bd92-83fecfd11a79\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
       "assertions": [
         {
           "id": "extension_registered",
           "expected": "Actual Pi emits the widget-core session-start status",
-          "observed": "{\"type\":\"extension_ui_request\",\"id\":\"5b24a11e-2d7a-4083-bd84-4a85471fd0cb\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}",
+          "observed": "{\"type\":\"extension_ui_request\",\"id\":\"bd37c963-6ea9-4cbe-874a-79e156ac31da\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}",
           "passed": true
         }
       ]
@@ -32,7 +32,7 @@
       "command": "npm run smoke:pi",
       "exit_code": 0,
       "passed": true,
-      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"8cf50a2b-ef1c-48e5-ac49-30cc0c168ed5\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"57e192fc-78b9-4f5d-8820-6b1762b1bfdb\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"2b1e86fd-208f-40bd-8e8f-ae1eda254c87\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"887beff3-199f-4640-a910-58434213cfc1\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
       "assertions": [
         {
           "id": "feature_response",
@@ -47,12 +47,12 @@
       "command": "npm run smoke:pi",
       "exit_code": 0,
       "passed": true,
-      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"e7f4c461-52b0-422c-92ac-086bb56d3870\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"d6e236bd-f325-450e-a9c6-046a32b20e4d\",\"method\":\"notify\",\"message\":\"pi-widget-core-error:providerId is required\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"009fd721-289e-4f8c-b6d1-94e244fc1e1f\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"c773657e-bcd5-4f8b-9a26-c4c3726a4113\",\"method\":\"notify\",\"message\":\"pi-widget-core-error:providerId is required\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
       "assertions": [
         {
           "id": "handled_error",
           "expected": "Invalid provider ID is rejected by core and handled by the actual Pi extension",
-          "observed": "{\"prompt\":{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}},\"errorNotification\":{\"type\":\"extension_ui_request\",\"id\":\"d6e236bd-f325-450e-a9c6-046a32b20e4d\",\"method\":\"notify\",\"message\":\"pi-widget-core-error:providerId is required\",\"notifyType\":\"info\"}}",
+          "observed": "{\"prompt\":{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}},\"errorNotification\":{\"type\":\"extension_ui_request\",\"id\":\"c773657e-bcd5-4f8b-9a26-c4c3726a4113\",\"method\":\"notify\",\"message\":\"pi-widget-core-error:providerId is required\",\"notifyType\":\"info\"}}",
           "passed": true
         }
       ]
@@ -62,12 +62,12 @@
       "command": "npm run smoke:pi",
       "exit_code": 0,
       "passed": true,
-      "evidence": "--- first Pi process ---\n{\"type\":\"extension_ui_request\",\"id\":\"e6f308c7-0e99-4370-a90c-d24de83d479f\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"e2abfdce-9c4a-450d-86c9-d36c2351baad\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n\n--- second Pi process ---\n{\"type\":\"extension_ui_request\",\"id\":\"2dc185c9-88d2-4f38-a5ca-7cedfc4e0860\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"7216e005-e761-4c43-860d-78c0dd8b8196\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "evidence": "--- first Pi process ---\n{\"type\":\"extension_ui_request\",\"id\":\"e6a9069b-356d-43b9-8249-1f3fc49e2290\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"03172f6e-823b-4c20-838f-10107f7bffe2\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n\n--- second Pi process ---\n{\"type\":\"extension_ui_request\",\"id\":\"87ca5656-9d8c-4fb2-b8ae-bb473915c333\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"62a39474-979b-4e2e-b66d-e664894ba5e6\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
       "assertions": [
         {
           "id": "reloaded_extension_registered",
           "expected": "The second Pi process emits the widget-core session-start status",
-          "observed": "{\"type\":\"extension_ui_request\",\"id\":\"2dc185c9-88d2-4f38-a5ca-7cedfc4e0860\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}",
+          "observed": "{\"type\":\"extension_ui_request\",\"id\":\"87ca5656-9d8c-4fb2-b8ae-bb473915c333\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}",
           "passed": true
         },
         {

@@ -9,12 +9,12 @@ export const EXTENSION_LOAD_ERROR_PATTERN = /Failed to load extension|Error load
 export const UNHANDLED_ERROR_PATTERN = /UnhandledPromiseRejection|uncaught exception|shutdown error/i;
 
 export function parseJsonLines(output) {
-  return output.split(/\r?\n/).flatMap((line) => {
+  return output.split(/\r?\n/).flatMap((line, index) => {
     if (!line.trim()) return [];
     try {
       return [JSON.parse(line)];
-    } catch {
-      return [];
+    } catch (error) {
+      throw new SyntaxError(`Invalid JSON in RPC stdout line ${index + 1}: ${line.slice(0, 200)}`, { cause: error });
     }
   });
 }

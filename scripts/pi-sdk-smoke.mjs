@@ -32,11 +32,21 @@ function run(name, executable, args, input) {
     const result = spawnSync(executable, args, {
       cwd: root, env, input, encoding: "utf8", timeout: 15_000, windowsHide: true,
     });
+    let responses = [];
+    let stdoutProtocolError;
+    if (name !== "host_shell") {
+      try {
+        responses = parseJsonLines(result.stdout ?? "");
+      } catch (error) {
+        stdoutProtocolError = error;
+      }
+    }
     return {
-      output: `${result.stdout ?? ""}${result.stderr ?? ""}${result.error ? `\n${result.error.message}` : ""}`,
+      output: `${result.stdout ?? ""}${result.stderr ?? ""}${result.error ? `\n${result.error.message}` : ""}`
+        + (stdoutProtocolError ? `\n[RPC stdout protocol error] ${stdoutProtocolError.message}` : ""),
       exit_code: result.status ?? 1,
       processExited: result.status !== null && result.status !== undefined && !result.error,
-      responses: [...parseJsonLines(result.stdout ?? ""), ...parseJsonLines(result.stderr ?? "")],
+      responses,
     };
   };
   const firstProcess = launch();
@@ -48,6 +58,7 @@ function run(name, executable, args, input) {
   const exit_code = result.exit_code;
   const processExited = result.processExited && (name !== "reload_cleanup" || firstProcess.processExited);
   const responses = result.responses;
+  const hasMalformedRpcStdout = !!(firstProcess.stdoutProtocolError || result.stdoutProtocolError);
   const assertions = behaviorAssertions(name, { responses, fullOutput, exit_code, processExited,
     firstExitCode: firstProcess.exit_code, firstProcessExited: firstProcess.processExited,
     processCount: name === "reload_cleanup" ? 2 : 1,
@@ -58,11 +69,13 @@ function run(name, executable, args, input) {
     name,
     command: "npm run smoke:pi",
     exit_code,
-    passed: processExited && exit_code === 0 && !hasUnhandledError && !hasLoadError && assertions.every((item) => item.passed),
+    passed: processExited && exit_code === 0 && !hasUnhandledError && !hasLoadError
+      && !hasMalformedRpcStdout && assertions.every((item) => item.passed),
     evidence: fullOutput.slice(-6000) || "No output captured",
     assertions,
     hasUnhandledError,
     hasLoadError,
+    hasMalformedRpcStdout,
   };
 }
 
@@ -93,7 +106,7 @@ try {
     unhandled_errors: cases.filter((item) => item.hasUnhandledError).length,
     extension_load_errors: cases.filter((item) => item.hasLoadError
       || (item.name === "extension_load" && !item.passed)).length,
-    cases: cases.map(({ hasUnhandledError, hasLoadError, ...item }) => item),
+    cases: cases.map(({ hasUnhandledError, hasLoadError, hasMalformedRpcStdout, ...item }) => item),
   };
   mkdirSync(dirname(reportPath), { recursive: true });
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
