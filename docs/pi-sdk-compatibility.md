@@ -1,0 +1,5 @@
+# Pi SDK 1.2.0 compatibility
+
+The SDK pin and migration guidance follow the verified [pi-extension-template baseline](https://github.com/eiei114/pi-extension-template/pull/131), reviewed at commit `4b0554151161eae665aa2cdc845a2d7df40e4781`. That baseline documents the upstream 1.2.0 API changes, including the `before_agent_start` message union. `pi-widget-core` itself imports no Pi SDK API in its published source, so no production API migration or SDK peer dependency is needed; public peer ranges remain unchanged.
+
+All four SDK packages are exact `1.2.0` development pins for a real-host compatibility smoke check. The harness launches the installed Pi CLI in an isolated agent directory and loads a test extension that imports this checkout's provider, host, and protocol modules. It exercises provider registration and normalized feature output, handled invalid-ID behavior, a second host process and disposal, and the native host shell. No model/provider inference or mocked Pi host is involved. Run `npm run smoke:pi`; `npm run ci` includes this check.

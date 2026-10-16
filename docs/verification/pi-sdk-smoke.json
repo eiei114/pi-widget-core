@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "verification_contract": "pi-sdk-behavior-v2",
+  "sdk_versions": {
+    "@earendil-works/pi-agent-core": "1.2.0",
+    "@earendil-works/pi-ai": "1.2.0",
+    "@earendil-works/pi-coding-agent": "1.2.0",
+    "@earendil-works/pi-tui": "1.2.0"
+  },
+  "platform": "win32",
+  "model_inference": "none; actual Pi extension-handled RPC and provider-runtime paths",
+  "unhandled_errors": 0,
+  "extension_load_errors": 0,
+  "cases": [
+    {
+      "name": "extension_load",
+      "command": "npm run smoke:pi",
+      "exit_code": 0,
+      "passed": true,
+      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"fff288c6-69de-48ad-8349-ed5fc7c104f7\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"cc52260d-c14a-4483-a274-39481a17f51b\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "assertions": [
+        {
+          "id": "extension_registered",
+          "expected": "Actual Pi emits the widget-core session-start status",
+          "observed": "{\"type\":\"extension_ui_request\",\"id\":\"fff288c6-69de-48ad-8349-ed5fc7c104f7\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "happy_path",
+      "command": "npm run smoke:pi",
+      "exit_code": 0,
+      "passed": true,
+      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"ba46016b-8e9f-4fe1-be11-a6252069d544\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"dcafb6ed-2800-400d-8900-4863245bcc09\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "assertions": [
+        {
+          "id": "feature_response",
+          "expected": "The handled Pi input reports the live normalized core provider entry",
+          "observed": "{\"prompt\":{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}},\"entry\":{\"providerId\":\"pi-widget-core-sdk-smoke\",\"available\":true,\"lines\":[\"widget core provider is live\"],\"updatedAt\":\"2026-10-16T00:00:00.000Z\",\"priority\":0}}",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "error_path",
+      "command": "npm run smoke:pi",
+      "exit_code": 0,
+      "passed": true,
+      "evidence": "{\"type\":\"extension_ui_request\",\"id\":\"ea3d7e62-acce-47ec-bb29-8fe038a8cd62\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"7ec62def-b6aa-4d12-b7e3-7ff17e1aeccf\",\"method\":\"notify\",\"message\":\"pi-widget-core-error:providerId is required\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "assertions": [
+        {
+          "id": "handled_error",
+          "expected": "Invalid provider ID is rejected by core and handled by the actual Pi extension",
+          "observed": "{\"prompt\":{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}},\"errorNotification\":{\"type\":\"extension_ui_request\",\"id\":\"7ec62def-b6aa-4d12-b7e3-7ff17e1aeccf\",\"method\":\"notify\",\"message\":\"pi-widget-core-error:providerId is required\",\"notifyType\":\"info\"}}",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "reload_cleanup",
+      "command": "npm run smoke:pi",
+      "exit_code": 0,
+      "passed": true,
+      "evidence": "--- first Pi process ---\n{\"type\":\"extension_ui_request\",\"id\":\"f03b68fa-1ad2-465f-96b0-d378019fc97a\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"e59864e1-9426-4c23-a69e-eb4f3ae4bbe4\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n\n--- second Pi process ---\n{\"type\":\"extension_ui_request\",\"id\":\"e81f608c-0cef-4875-a1a7-5722558170f1\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}\n{\"type\":\"extension_ui_request\",\"id\":\"cdc275ac-0ece-4fde-b5c9-b4ac55ee6094\",\"method\":\"notify\",\"message\":\"pi-widget-core:{\\\"providerId\\\":\\\"pi-widget-core-sdk-smoke\\\",\\\"available\\\":true,\\\"lines\\\":[\\\"widget core provider is live\\\"],\\\"updatedAt\\\":\\\"2026-10-16T00:00:00.000Z\\\",\\\"priority\\\":0}\",\"notifyType\":\"info\"}\n{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}}\n[pi-widget-core-smoke] clean_shutdown\n",
+      "assertions": [
+        {
+          "id": "reloaded_extension_registered",
+          "expected": "The second Pi process emits the widget-core session-start status",
+          "observed": "{\"type\":\"extension_ui_request\",\"id\":\"e81f608c-0cef-4875-a1a7-5722558170f1\",\"method\":\"setStatus\",\"statusKey\":\"widget-core\",\"statusText\":\"Pi widget core loaded\"}",
+          "passed": true
+        },
+        {
+          "id": "reloaded_feature_response",
+          "expected": "The second Pi process handles input and reports the live provider entry",
+          "observed": "{\"prompt\":{\"type\":\"response\",\"command\":\"prompt\",\"success\":true,\"data\":{\"disposition\":\"handled\"}},\"entry\":{\"providerId\":\"pi-widget-core-sdk-smoke\",\"available\":true,\"lines\":[\"widget core provider is live\"],\"updatedAt\":\"2026-10-16T00:00:00.000Z\",\"priority\":0}}",
+          "passed": true
+        },
+        {
+          "id": "clean_shutdown",
+          "expected": "The second process exits after disposing the provider without shutdown errors",
+          "observed": "{\"first_exit_code\":0,\"first_process_exited\":true,\"exit_code\":0,\"processExited\":true,\"processCount\":2,\"cleanupMarkerCount\":2,\"shutdownErrors\":false}",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "host_shell",
+      "command": "npm run smoke:pi",
+      "exit_code": 0,
+      "passed": true,
+      "evidence": "1.2.0\n",
+      "assertions": [
+        {
+          "id": "native_shell_boundary",
+          "expected": "Native host shell launches local Pi CLI and prints its exact SDK version",
+          "observed": "{\"exit_code\":0,\"output\":\"1.2.0\",\"expectedVersion\":\"1.2.0\"}",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

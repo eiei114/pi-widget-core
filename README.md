@@ -39,7 +39,7 @@ npm install pi-widget-core
 Pin a specific version when you want reproducible installs:
 
 ```bash
-npm install pi-widget-core@0.1.9
+npm install pi-widget-core@0.1.10
 ```
 
 ## Quick start
@@ -132,13 +132,15 @@ clearHostPresent();
 ## Development
 
 Requires Node.js 20 or later (see `engines.node` in `package.json`).
+The live Pi SDK smoke check requires Node.js 22.19 or later for its pinned Pi CLI; this does not change the library's Node.js runtime minimum.
 
 ```bash
 npm install
 npm run ci
 ```
 
-`npm run ci` runs typecheck, tests, and `npm pack --dry-run`.
+`npm run ci` runs typecheck, tests, an isolated live Pi SDK smoke check, and `npm pack --dry-run`.
+The smoke check uses the exact Pi SDK 1.2.0 development pins and makes no model requests.
 
 ## Release
 
