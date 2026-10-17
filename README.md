@@ -39,7 +39,7 @@ npm install pi-widget-core
 Pin a specific version when you want reproducible installs:
 
 ```bash
-npm install pi-widget-core@0.1.9
+npm install pi-widget-core@0.1.10
 ```
 
 ## Quick start
@@ -132,22 +132,28 @@ clearHostPresent();
 ## Development
 
 Requires Node.js 20 or later (see `engines.node` in `package.json`).
+The live Pi SDK smoke check requires Node.js 22.19 or later for its pinned Pi CLI; this does not change the library's Node.js runtime minimum.
 
 ```bash
 npm install
 npm run ci
 ```
 
-`npm run ci` runs typecheck, tests, and `npm pack --dry-run`.
+`npm run ci` runs typecheck, tests, an isolated live Pi SDK smoke check, and `npm pack --dry-run`.
+The smoke check uses the exact Pi SDK 1.2.0 development pins and makes no model requests.
 
 ## Release
 
 This package publishes to npm via GitHub Actions Trusted Publishing—no `NPM_TOKEN` is required.
 
-1. Bump `package.json` version and add a `CHANGELOG.md` entry.
-2. Merge to `main`; the publish workflow validates the package and publishes new versions.
+1. Bump `package.json` version and add a `CHANGELOG.md` entry, then merge the change to `main`.
+2. In GitHub Actions, manually run **Auto Release** on `main` with
+   `release_authorized=true`. It creates the version tag and GitHub Release,
+   then dispatches **Publish to npm** with `publish_authorized=true`.
 
-Tagged releases (`v*.*.*`) and `package.json` changes on `main` can both trigger publish.
+You can also manually run **Publish to npm** for a selected ref with
+`publish_authorized=true`. Merging to `main` or pushing a tag alone does not
+create a release or publish to npm.
 
 ## Security
 

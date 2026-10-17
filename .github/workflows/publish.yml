@@ -1,23 +1,17 @@
 name: Publish to npm
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - package.json
-      - package-lock.json
-      - .github/workflows/publish.yml
-    tags:
-      - 'v*.*.*'
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       ref:
         description: Git ref to publish (defaults to selected ref)
         required: false
         type: string
+      publish_authorized:
+        description: Explicitly authorize publishing this package version to npm
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -29,6 +23,7 @@ concurrency:
 
 jobs:
   publish:
+    if: inputs.publish_authorized
     runs-on: ubuntu-latest
 
     steps:

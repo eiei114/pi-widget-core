@@ -1,6 +1,6 @@
 {
   "name": "pi-widget-core",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Maintainer-facing core library for Pi widget host/provider protocol, presence switching, and shared runtime helpers.",
   "type": "module",
   "license": "MIT",
@@ -34,8 +34,9 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test \"test/**/*.test.ts\"",
-    "ci": "npm run typecheck && npm test && npm run pack:check",
+    "test": "node --import tsx --test \"test/**/*.test.ts\" \"test/**/*.test.mjs\"",
+    "ci": "npm run typecheck && npm test && npm run smoke:pi && npm run pack:check",
+    "smoke:pi": "node scripts/pi-sdk-smoke.mjs",
     "pack:check": "npm pack --dry-run"
   },
   "engines": {
@@ -45,6 +46,10 @@
     "access": "public"
   },
   "devDependencies": {
+    "@earendil-works/pi-agent-core": "1.2.0",
+    "@earendil-works/pi-ai": "1.2.0",
+    "@earendil-works/pi-coding-agent": "1.2.0",
+    "@earendil-works/pi-tui": "1.2.0",
     "@types/node": "^25.9.1",
     "tsx": "^4.20.6",
     "typescript": "^6.0.3"
