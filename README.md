@@ -39,7 +39,7 @@ npm install pi-widget-core
 Pin a specific version when you want reproducible installs:
 
 ```bash
-npm install pi-widget-core@0.1.10
+npm install pi-widget-core@0.1.11
 ```
 
 ## Quick start
@@ -140,7 +140,7 @@ npm run ci
 ```
 
 `npm run ci` runs typecheck, tests, an isolated live Pi SDK smoke check, and `npm pack --dry-run`.
-The smoke check uses the exact Pi SDK 1.2.0 development pins and makes no model requests.
+The smoke check uses the exact Pi SDK development pins from `package.json` and makes no model requests.
 
 ## Release
 
