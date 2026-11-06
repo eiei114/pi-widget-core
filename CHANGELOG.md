@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## 0.1.11 - 2026-11-06
+
+- test: derive Pi SDK smoke expectations from exact package.json development pins
+
 ## 0.1.10 - 2026-10-16
 
 - test: verify compatibility with Pi SDK 1.2.0 in an isolated live host

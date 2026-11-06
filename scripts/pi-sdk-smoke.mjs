@@ -4,17 +4,19 @@ import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import {
   behaviorAssertions, EXTENSION_LOAD_ERROR_PATTERN, hasMalformedRpcStdout, parseJsonLines,
-  SDK_VERSIONS, smokeCasePassed, UNHANDLED_ERROR_PATTERN, VERIFICATION_CONTRACT,
+  getSdkVersions, SDK_PACKAGE_NAMES, smokeCasePassed, UNHANDLED_ERROR_PATTERN, VERIFICATION_CONTRACT,
 } from "./pi-sdk-smoke-contract.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const reportPath = resolve(root, "docs/verification/pi-sdk-smoke.json");
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 const manifest = readJson(resolve(root, "package.json"));
-const installedVersions = Object.fromEntries(Object.entries(SDK_VERSIONS).map(([name, expected]) => {
+const expectedVersions = getSdkVersions(manifest.devDependencies);
+const installedVersions = Object.fromEntries(SDK_PACKAGE_NAMES.map((name) => {
+  const expected = expectedVersions[name];
   const installed = readJson(resolve(root, "node_modules", name, "package.json")).version;
-  if (manifest.devDependencies?.[name] !== expected || installed !== expected) {
-    throw new Error(`Smoke requires the exact ${expected} dev/test pin for ${name}; installed ${installed}`);
+  if (installed !== expected) {
+    throw new Error(`Smoke requires ${name} at the package.json dev/test pin ${expected}; installed ${installed}`);
   }
   return [name, installed];
 }));
@@ -63,7 +65,8 @@ function run(name, executable, args, input) {
   const assertions = behaviorAssertions(name, { responses, fullOutput, exit_code, processExited,
     firstExitCode: firstProcess.exit_code, firstProcessExited: firstProcess.processExited,
     processCount: name === "reload_cleanup" ? 2 : 1,
-    firstProcessOutput: firstProcess.output, secondProcessOutput: result.output });
+    firstProcessOutput: firstProcess.output, secondProcessOutput: result.output,
+    piCodingAgentVersion: installedVersions["@earendil-works/pi-coding-agent"] });
   const hasUnhandledError = UNHANDLED_ERROR_PATTERN.test(fullOutput);
   const hasLoadError = EXTENSION_LOAD_ERROR_PATTERN.test(fullOutput);
   return {

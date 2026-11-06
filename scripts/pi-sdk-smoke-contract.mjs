@@ -1,10 +1,20 @@
 export const VERIFICATION_CONTRACT = "pi-sdk-behavior-v2";
-export const SDK_VERSIONS = {
-  "@earendil-works/pi-agent-core": "1.2.0",
-  "@earendil-works/pi-ai": "1.2.0",
-  "@earendil-works/pi-coding-agent": "1.2.0",
-  "@earendil-works/pi-tui": "1.2.0",
-};
+export const SDK_PACKAGE_NAMES = [
+  "@earendil-works/pi-agent-core",
+  "@earendil-works/pi-ai",
+  "@earendil-works/pi-coding-agent",
+  "@earendil-works/pi-tui",
+];
+
+export function getSdkVersions(devDependencies) {
+  return Object.fromEntries(SDK_PACKAGE_NAMES.map((name) => {
+    const version = devDependencies?.[name];
+    if (typeof version !== "string" || version.length === 0) {
+      throw new Error(`Smoke requires an exact dev/test pin for ${name} in package.json`);
+    }
+    return [name, version];
+  }));
+}
 export const EXTENSION_LOAD_ERROR_PATTERN = /Failed to load extension|Error loading extension/i;
 export const UNHANDLED_ERROR_PATTERN = /UnhandledPromiseRejection|uncaught exception|shutdown error/i;
 
@@ -50,6 +60,7 @@ export function behaviorAssertions(name, {
   responses, fullOutput, exit_code, processExited, firstExitCode = exit_code,
   firstProcessExited = processExited, processCount = 1,
   firstProcessOutput = fullOutput, secondProcessOutput = fullOutput,
+  piCodingAgentVersion,
 }) {
   const status = responses.find((row) => row?.type === "extension_ui_request"
     && row.method === "setStatus" && row.statusKey === "widget-core"
@@ -104,8 +115,8 @@ export function behaviorAssertions(name, {
   }
   if (name === "host_shell") {
     return [assertion("native_shell_boundary", "Native host shell launches local Pi CLI and prints its exact SDK version",
-      { exit_code, output: fullOutput.trim(), expectedVersion: SDK_VERSIONS["@earendil-works/pi-coding-agent"] },
-      exit_code === 0 && processExited && fullOutput.trim() === SDK_VERSIONS["@earendil-works/pi-coding-agent"])];
+      { exit_code, output: fullOutput.trim(), expectedVersion: piCodingAgentVersion },
+      exit_code === 0 && processExited && fullOutput.trim() === piCodingAgentVersion)];
   }
   throw new Error(`Unknown smoke case: ${name}`);
 }

@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  behaviorAssertions, hasMalformedRpcStdout, parseJsonLines, smokeCasePassed, VERIFICATION_CONTRACT,
+  behaviorAssertions, getSdkVersions, hasMalformedRpcStdout, parseJsonLines, smokeCasePassed,
+  VERIFICATION_CONTRACT, SDK_PACKAGE_NAMES,
 } from "../scripts/pi-sdk-smoke-contract.mjs";
 
 const status = { type: "extension_ui_request", method: "setStatus", statusKey: "widget-core", statusText: "Pi widget core loaded" };
@@ -9,6 +10,7 @@ const prompt = { type: "response", command: "prompt", success: true, data: { dis
 const entry = { providerId: "pi-widget-core-sdk-smoke", available: true, lines: ["widget core provider is live"] };
 const notification = { type: "extension_ui_request", method: "notify", message: `pi-widget-core:${JSON.stringify(entry)}` };
 const cleanOutput = "[pi-widget-core-smoke] clean_shutdown\n[pi-widget-core-smoke] clean_shutdown";
+const piCodingAgentVersion = "fixture-sdk-version";
 const observed = (responses = [status, prompt, notification], fullOutput = cleanOutput, exit_code = 0,
   processExited = true, firstProcessOutput = fullOutput, secondProcessOutput = fullOutput) =>
   ({ responses, fullOutput, exit_code, processExited, firstExitCode: exit_code,
@@ -17,6 +19,13 @@ const observed = (responses = [status, prompt, notification], fullOutput = clean
 test("contract ID and JSON-lines parser handle LF/CRLF and blank lines", () => {
   assert.equal(VERIFICATION_CONTRACT, "pi-sdk-behavior-v2");
   assert.deepEqual(parseJsonLines(`${JSON.stringify(prompt)}\r\n\n`), [prompt]);
+});
+
+test("smoke expectations use exact SDK pins from package.json devDependencies", () => {
+  const devDependencies = Object.fromEntries(SDK_PACKAGE_NAMES.map((name) => [name, "fixture-sdk-version"]));
+  assert.deepEqual(getSdkVersions(devDependencies), devDependencies);
+  assert.throws(() => getSdkVersions({ ...devDependencies, "@earendil-works/pi-ai": undefined }),
+    /exact dev\/test pin for @earendil-works\/pi-ai/);
 });
 
 test("JSON-lines parser rejects non-empty malformed RPC stdout", () => {
@@ -44,7 +53,9 @@ test("positive observations pass for extension load, feature, handled error, rel
   assert.equal(behaviorAssertions("happy_path", observed())[0].passed, true);
   assert.equal(behaviorAssertions("error_path", observed([prompt, errorResponse]))[0].passed, true);
   assert.ok(behaviorAssertions("reload_cleanup", observed()).every((item) => item.passed));
-  assert.equal(behaviorAssertions("host_shell", observed([], "1.2.0\r\n"))[0].passed, true);
+  assert.equal(behaviorAssertions("host_shell", {
+    ...observed([], `${piCodingAgentVersion}\r\n`), piCodingAgentVersion,
+  })[0].passed, true);
 });
 
 test("missing or wrong feature responses fail positive and deliberately negative fixtures", () => {
@@ -77,9 +88,13 @@ test("reload requires the second host registration, real feature response, and d
 });
 
 test("host shell checks exact version, actual process exit, and extension load detects wrong registration", () => {
-  for (const output of ["", "11.2.0", "1.2.0 but error", "1.0.0"]) {
-    assert.equal(behaviorAssertions("host_shell", observed([], output))[0].passed, false);
+  for (const output of ["", "other-version", `${piCodingAgentVersion} but error`, "wrong-version"]) {
+    assert.equal(behaviorAssertions("host_shell", {
+      ...observed([], output), piCodingAgentVersion,
+    })[0].passed, false);
   }
-  assert.equal(behaviorAssertions("host_shell", observed([], "1.2.0", 0, false))[0].passed, false);
+  assert.equal(behaviorAssertions("host_shell", {
+    ...observed([], piCodingAgentVersion, 0, false), piCodingAgentVersion,
+  })[0].passed, false);
   assert.equal(behaviorAssertions("extension_load", observed([{ ...status, statusKey: "other" }]))[0].passed, false);
 });

@@ -1,6 +1,6 @@
 {
   "name": "pi-widget-core",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Maintainer-facing core library for Pi widget host/provider protocol, presence switching, and shared runtime helpers.",
   "type": "module",
   "license": "MIT",
@@ -46,10 +46,10 @@
     "access": "public"
   },
   "devDependencies": {
-    "@earendil-works/pi-agent-core": "1.2.0",
-    "@earendil-works/pi-ai": "1.2.0",
-    "@earendil-works/pi-coding-agent": "1.2.0",
-    "@earendil-works/pi-tui": "1.2.0",
+    "@earendil-works/pi-agent-core": "1.4.0",
+    "@earendil-works/pi-ai": "1.4.0",
+    "@earendil-works/pi-coding-agent": "1.4.0",
+    "@earendil-works/pi-tui": "1.4.0",
     "@types/node": "^25.9.1",
     "tsx": "^4.20.6",
     "typescript": "^6.0.3"
