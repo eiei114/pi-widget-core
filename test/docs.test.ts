@@ -10,6 +10,9 @@ const packageJson = JSON.parse(readFileSync(`${root}/package.json`, "utf8")) as 
 };
 const readme = readFileSync(`${root}/README.md`, "utf8");
 const changelog = readFileSync(`${root}/CHANGELOG.md`, "utf8");
+const compatibilityDoc = readFileSync(`${root}/docs/pi-sdk-compatibility.md`, "utf8");
+const smokeScript = readFileSync(`${root}/scripts/pi-sdk-smoke.mjs`, "utf8");
+const ciWorkflow = readFileSync(`${root}/.github/workflows/ci.yml`, "utf8");
 
 test("README pinned install example matches package.json version", () => {
   const match = readme.match(/npm install pi-widget-core@(\d+\.\d+\.\d+)/);
@@ -51,6 +54,37 @@ test("README Development documents package.json Node.js engine requirement", () 
     development[0],
     new RegExp(`Node\\.js\\s+${minimumMajor}`, "i"),
     "Development section should document the Node.js engine requirement from package.json",
+  );
+});
+
+test("compatibility doc states the host-shell platform boundary the smoke harness implements", () => {
+  // The harness picks the shell from process.platform: PowerShell on win32, /bin/sh elsewhere.
+  assert.match(smokeScript, /process\.platform === "win32"/, "smoke harness should branch on win32");
+  assert.match(smokeScript, /powershell\.exe/, "win32 branch should run PowerShell");
+  assert.match(smokeScript, /"\/bin\/sh"/, "non-win32 branch should run /bin/sh");
+
+  // CI runs on ubuntu-latest only, so it can never cover the Windows PowerShell branch.
+  assert.match(ciWorkflow, /runs-on: ubuntu-latest/, "CI workflow is expected to run on ubuntu-latest");
+  assert.doesNotMatch(ciWorkflow, /windows-latest/, "flip the documented boundary if CI starts running Windows");
+
+  assert.match(
+    compatibilityDoc,
+    /Windows PowerShell case runs only on a Windows host/i,
+    "compatibility doc should say the Windows PowerShell case is Windows-host-only",
+  );
+  assert.ok(
+    compatibilityDoc.includes("`/bin/sh`"),
+    "compatibility doc should name the non-Windows /bin/sh branch",
+  );
+  assert.match(
+    compatibilityDoc,
+    /`ubuntu-latest` only/i,
+    "compatibility doc should state that CI covers the non-Windows branch only",
+  );
+  assert.match(
+    compatibilityDoc,
+    /Windows PowerShell coverage requires running/i,
+    "compatibility doc should say a Windows run is required for Windows-shell coverage",
   );
 });
 

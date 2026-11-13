@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## 0.1.12 - 2026-11-08
+
+- chore: pin Pi SDK 1.5.0 for compatibility verification
+- docs: state the Windows PowerShell / non-Windows `/bin/sh` host-shell boundary of the smoke harness
+
 ## 0.1.11 - 2026-11-06
 
 - test: derive Pi SDK smoke expectations from exact package.json development pins
