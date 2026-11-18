@@ -125,7 +125,8 @@ function createRegistry(): WidgetHostRegistry {
       notify();
     },
     remove(providerId) {
-      if (!entries.delete(String(providerId))) return;
+      const normalizedProviderId = trimNonEmpty(providerId);
+      if (!normalizedProviderId || !entries.delete(normalizedProviderId)) return;
       notify();
     },
     list() {

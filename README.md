@@ -57,6 +57,8 @@ import { registerProvider } from "pi-widget-core/provider";
 import { markHostPresent, listProviderEntries } from "pi-widget-core/host";
 ```
 
+Registry provider ids are trimmed on both `set` and `remove`, so the same padded id can be used to publish and remove an entry. Empty or non-string ids passed to `remove` are ignored.
+
 **Widget provider** — register callbacks for rendered lines and host presence, then call `refresh()` when your widget state changes:
 
 ```ts

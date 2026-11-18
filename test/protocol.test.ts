@@ -58,6 +58,44 @@ test("registry publishes, dedupes, lists, and removes normalized entries", () =>
   clearProviderEntries();
 });
 
+test("registry remove trims ids and ignores invalid or unknown ids", () => {
+  const registry = getWidgetHostRegistry();
+  registry.clear();
+
+  let notifications = 0;
+  const dispose = registry.subscribe(() => {
+    notifications += 1;
+  });
+
+  try {
+    publishProviderEntry({
+      providerId: " id ",
+      available: true,
+      lines: ["hello"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+    });
+    assert.equal(notifications, 1);
+
+    notifications = 0;
+    assert.doesNotThrow(() => removeProviderEntry(" id "));
+    assert.deepEqual(registry.list(), []);
+    assert.equal(notifications, 1);
+
+    notifications = 0;
+    removeProviderEntry("unknown");
+    removeProviderEntry("");
+    removeProviderEntry(" \t ");
+    assert.equal(notifications, 0);
+
+    assert.doesNotThrow(() => removeProviderEntry(null as any));
+    assert.doesNotThrow(() => removeProviderEntry(undefined as any));
+    assert.equal(notifications, 0);
+  } finally {
+    dispose();
+    clearProviderEntries();
+  }
+});
+
 test("registry listener failures are logged without interrupting mutations or siblings", () => {
   const registry = getWidgetHostRegistry();
   registry.clear();
