@@ -109,6 +109,8 @@ unsubscribe();
 clearHostPresent();
 ```
 
+**Error isolation** — Registry and host-presence listeners are called independently from a snapshot. A listener that throws or unsubscribes during dispatch will not interrupt its siblings; listener failures are logged to `console.error` and do not escape the publishing or presence APIs.
+
 ### Export surface
 
 | Subpath | Purpose |
