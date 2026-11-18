@@ -15,6 +15,10 @@ export interface ProviderEntry {
 type RegistryListener = () => void;
 type PresenceListener = (active: boolean) => void;
 
+function reportListenerError(error: unknown): void {
+  console.error("[pi-widget-core] listener failed:", error);
+}
+
 export interface WidgetHostRegistry {
   version: 1;
   set: (entry: ProviderEntry) => void;
@@ -86,8 +90,12 @@ function createRegistry(): WidgetHostRegistry {
   const listeners = new Set<RegistryListener>();
 
   const notify = () => {
-    for (const listener of listeners) {
-      listener();
+    for (const listener of [...listeners]) {
+      try {
+        listener();
+      } catch (error) {
+        reportListenerError(error);
+      }
     }
   };
 
@@ -174,8 +182,12 @@ export function setHostPresenceActive(active: boolean): void {
   const store = getHostPresenceStore();
   if (store.active === active) return;
   store.active = active;
-  for (const listener of store.listeners) {
-    listener(active);
+  for (const listener of [...store.listeners]) {
+    try {
+      listener(active);
+    } catch (error) {
+      reportListenerError(error);
+    }
   }
 }
 
