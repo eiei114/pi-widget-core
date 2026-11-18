@@ -112,6 +112,84 @@ test("registry listener failures are logged without interrupting mutations or si
   }
 });
 
+test("async listener failures and logger failures do not interrupt dispatch", async () => {
+  const registry = getWidgetHostRegistry();
+  registry.clear();
+
+  const originalConsoleError = console.error;
+  const loggedErrors: unknown[][] = [];
+  console.error = (...args: Parameters<typeof console.error>) => {
+    loggedErrors.push(args);
+  };
+
+  const failure = new Error("async listener failed");
+  const registryCalls: string[] = [];
+  const disposeAsyncRegistry = registry.subscribe(async () => {
+    registryCalls.push("async");
+    throw failure;
+  });
+  const disposeRegistrySibling = registry.subscribe(() => {
+    registryCalls.push("sibling");
+  });
+
+  const presenceCalls: string[] = [];
+  const disposeAsyncPresence = subscribeToHostPresence(async (active) => {
+    presenceCalls.push(`async:${active}`);
+    throw failure;
+  });
+  const disposePresenceSibling = subscribeToHostPresence((active) => {
+    presenceCalls.push(`sibling:${active}`);
+  });
+
+  try {
+    assert.doesNotThrow(() => publishProviderEntry({
+      providerId: "async",
+      available: true,
+      lines: ["async"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+    }));
+    assert.deepEqual(registryCalls, ["async", "sibling"]);
+
+    assert.doesNotThrow(() => setHostPresenceActive(true));
+    assert.deepEqual(presenceCalls, ["async:true", "sibling:true"]);
+    await Promise.resolve();
+
+    assert.equal(loggedErrors.length, 2);
+    for (const args of loggedErrors) {
+      assert.equal(args[0], "[pi-widget-core] listener failed:");
+      assert.equal(args[1], failure);
+    }
+  } finally {
+    disposeAsyncRegistry();
+    disposeRegistrySibling();
+    disposeAsyncPresence();
+    disposePresenceSibling();
+    console.error = () => {
+      throw new Error("logger failed");
+    };
+    const disposeThrowing = registry.subscribe(() => {
+      throw failure;
+    });
+    const calls: string[] = [];
+    const disposeLater = registry.subscribe(() => calls.push("later"));
+    try {
+      assert.doesNotThrow(() => publishProviderEntry({
+        providerId: "logger",
+        available: true,
+        lines: ["logger"],
+        updatedAt: "2026-06-15T12:00:00.000Z",
+      }));
+      assert.deepEqual(calls, ["later"]);
+    } finally {
+      disposeThrowing();
+      disposeLater();
+      console.error = originalConsoleError;
+      clearProviderEntries();
+      setHostPresenceActive(false);
+    }
+  }
+});
+
 test("normalizeProviderId trims and rejects empty ids", () => {
   assert.equal(normalizeProviderId(" demo "), "demo");
   assert.throws(() => normalizeProviderId("   "), /providerId is required/);
@@ -257,6 +335,93 @@ test("self-unsubscribing presence listeners do not skip siblings", () => {
   } finally {
     disposeSelf();
     disposeSibling();
+    setHostPresenceActive(false);
+  }
+});
+
+test("registry dispatch snapshots defer new listeners and skip disposed listeners", () => {
+  const registry = getWidgetHostRegistry();
+  registry.clear();
+
+  const calls: string[] = [];
+  let added = false;
+  let disposeAdded = () => {};
+  const disposeAdding = registry.subscribe(() => {
+    calls.push("adding");
+    if (!added) {
+      added = true;
+      disposeAdded = registry.subscribe(() => calls.push("added"));
+    }
+  });
+  let disposeRemoved = () => {};
+  const disposeRemoving = registry.subscribe(() => {
+    calls.push("removing");
+    disposeRemoved();
+  });
+  disposeRemoved = registry.subscribe(() => calls.push("removed"));
+  const disposeSibling = registry.subscribe(() => calls.push("sibling"));
+
+  try {
+    publishProviderEntry({
+      providerId: "first",
+      available: true,
+      lines: ["first"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+    });
+    assert.deepEqual(calls, ["adding", "removing", "sibling"]);
+
+    calls.length = 0;
+    publishProviderEntry({
+      providerId: "second",
+      available: true,
+      lines: ["second"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+    });
+    assert.deepEqual(calls, ["adding", "removing", "sibling", "added"]);
+  } finally {
+    disposeAdding();
+    disposeRemoving();
+    disposeRemoved();
+    disposeSibling();
+    disposeAdded();
+    clearProviderEntries();
+  }
+});
+
+test("presence dispatch snapshots defer new listeners and skip disposed listeners", () => {
+  setHostPresenceActive(false);
+
+  const calls: string[] = [];
+  let added = false;
+  let disposeAdded = () => {};
+  const disposeAdding = subscribeToHostPresence((active) => {
+    calls.push(`adding:${active}`);
+    if (!added) {
+      added = true;
+      disposeAdded = subscribeToHostPresence((nextActive) => calls.push(`added:${nextActive}`));
+    }
+  });
+  let disposeRemoved = () => {};
+  const disposeRemoving = subscribeToHostPresence((active) => {
+    calls.push(`removing:${active}`);
+    disposeRemoved();
+  });
+  disposeRemoved = subscribeToHostPresence((active) => calls.push(`removed:${active}`));
+  const disposeSibling = subscribeToHostPresence((active) => calls.push(`sibling:${active}`));
+
+  try {
+    setHostPresenceActive(true);
+    assert.deepEqual(calls, ["adding:true", "removing:true", "sibling:true"]);
+
+    calls.length = 0;
+    setHostPresenceActive(false);
+    assert.deepEqual(calls, ["adding:false", "removing:false", "sibling:false", "added:false"]);
+  } finally {
+    disposeAdding();
+    disposeRemoving();
+    disposeRemoved();
+    disposeSibling();
+    disposeAdded();
     setHostPresenceActive(false);
   }
 });

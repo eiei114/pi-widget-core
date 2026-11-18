@@ -16,7 +16,26 @@ type RegistryListener = () => void;
 type PresenceListener = (active: boolean) => void;
 
 function reportListenerError(error: unknown): void {
-  console.error("[pi-widget-core] listener failed:", error);
+  try {
+    console.error("[pi-widget-core] listener failed:", error);
+  } catch {
+    // Logging must not let one broken listener interrupt the remaining listeners.
+  }
+}
+
+function dispatchListener(listener: () => unknown): void {
+  try {
+    const result = listener();
+    if (
+      result !== null &&
+      (typeof result === "object" || typeof result === "function") &&
+      typeof (result as PromiseLike<unknown>).then === "function"
+    ) {
+      void Promise.resolve(result).catch(reportListenerError);
+    }
+  } catch (error) {
+    reportListenerError(error);
+  }
 }
 
 export interface WidgetHostRegistry {
@@ -91,11 +110,8 @@ function createRegistry(): WidgetHostRegistry {
 
   const notify = () => {
     for (const listener of [...listeners]) {
-      try {
-        listener();
-      } catch (error) {
-        reportListenerError(error);
-      }
+      if (!listeners.has(listener)) continue;
+      dispatchListener(listener as () => unknown);
     }
   };
 
@@ -183,11 +199,8 @@ export function setHostPresenceActive(active: boolean): void {
   if (store.active === active) return;
   store.active = active;
   for (const listener of [...store.listeners]) {
-    try {
-      listener(active);
-    } catch (error) {
-      reportListenerError(error);
-    }
+    if (!store.listeners.has(listener)) continue;
+    dispatchListener(() => (listener as (active: boolean) => unknown)(active));
   }
 }
 
