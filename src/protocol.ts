@@ -15,6 +15,29 @@ export interface ProviderEntry {
 type RegistryListener = () => void;
 type PresenceListener = (active: boolean) => void;
 
+function reportListenerError(error: unknown): void {
+  try {
+    console.error("[pi-widget-core] listener failed:", error);
+  } catch {
+    // Logging must not let one broken listener interrupt the remaining listeners.
+  }
+}
+
+function dispatchListener(listener: () => unknown): void {
+  try {
+    const result = listener();
+    if (
+      result !== null &&
+      (typeof result === "object" || typeof result === "function") &&
+      typeof (result as PromiseLike<unknown>).then === "function"
+    ) {
+      void Promise.resolve(result).catch(reportListenerError);
+    }
+  } catch (error) {
+    reportListenerError(error);
+  }
+}
+
 export interface WidgetHostRegistry {
   version: 1;
   set: (entry: ProviderEntry) => void;
@@ -86,8 +109,9 @@ function createRegistry(): WidgetHostRegistry {
   const listeners = new Set<RegistryListener>();
 
   const notify = () => {
-    for (const listener of listeners) {
-      listener();
+    for (const listener of [...listeners]) {
+      if (!listeners.has(listener)) continue;
+      dispatchListener(listener as () => unknown);
     }
   };
 
@@ -101,7 +125,8 @@ function createRegistry(): WidgetHostRegistry {
       notify();
     },
     remove(providerId) {
-      if (!entries.delete(String(providerId))) return;
+      const normalizedProviderId = trimNonEmpty(providerId);
+      if (!normalizedProviderId || !entries.delete(normalizedProviderId)) return;
       notify();
     },
     list() {
@@ -174,8 +199,9 @@ export function setHostPresenceActive(active: boolean): void {
   const store = getHostPresenceStore();
   if (store.active === active) return;
   store.active = active;
-  for (const listener of store.listeners) {
-    listener(active);
+  for (const listener of [...store.listeners]) {
+    if (!store.listeners.has(listener)) continue;
+    dispatchListener(() => (listener as (active: boolean) => unknown)(active));
   }
 }
 

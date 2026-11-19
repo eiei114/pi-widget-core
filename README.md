@@ -57,6 +57,8 @@ import { registerProvider } from "pi-widget-core/provider";
 import { markHostPresent, listProviderEntries } from "pi-widget-core/host";
 ```
 
+Registry provider ids are trimmed on both `set` and `remove`, so the same padded id can be used to publish and remove an entry. Empty or non-string ids passed to `remove` are ignored.
+
 **Widget provider** — register callbacks for rendered lines and host presence, then call `refresh()` when your widget state changes:
 
 ```ts
@@ -108,6 +110,8 @@ const unsubscribe = subscribeToProviderEntries(() => {
 unsubscribe();
 clearHostPresent();
 ```
+
+**Error isolation** — Registry and host-presence listeners are called independently from a snapshot. A listener that throws or unsubscribes during dispatch will not interrupt its siblings; listener failures are logged to `console.error` and do not escape the publishing or presence APIs.
 
 ### Export surface
 
