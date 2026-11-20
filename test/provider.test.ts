@@ -162,3 +162,111 @@ test("registerProvider reads callbacks and notifies host presence changes", () =
   clearProviderEntries();
   clearHostPresent();
 });
+
+test("provider runtime returns defensive snapshots of updates", () => {
+  clearProviderEntries();
+  clearHostPresent();
+
+  const runtime = createProviderRuntime({ providerId: "snapshot-provider" });
+
+  try {
+    const returned = runtime.update({
+      available: true,
+      lines: ["original line"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+      tags: ["original tag"],
+    });
+
+    returned.providerId = "mutated-provider";
+    returned.available = false;
+    returned.lines[0] = "mutated line";
+    returned.lines.push("extra line");
+    returned.tags![0] = "mutated tag";
+    returned.tags!.push("extra tag");
+
+    markHostPresent();
+    assert.deepEqual(listProviderEntries()[0], {
+      providerId: "snapshot-provider",
+      available: true,
+      lines: ["original line"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+      priority: 0,
+      tags: ["original tag"],
+      mode: undefined,
+      ttlMs: undefined,
+    });
+
+    const secondReturned = runtime.update({
+      available: true,
+      lines: ["second line"],
+      updatedAt: "2026-06-15T12:01:00.000Z",
+      tags: ["second tag"],
+    });
+    secondReturned.lines[0] = "also mutated";
+    secondReturned.tags![0] = "also mutated";
+
+    clearHostPresent();
+    markHostPresent();
+    assert.deepEqual(listProviderEntries()[0]?.lines, ["second line"]);
+    assert.deepEqual(listProviderEntries()[0]?.tags, ["second tag"]);
+  } finally {
+    runtime.stop();
+    clearProviderEntries();
+    clearHostPresent();
+  }
+});
+
+test("registered provider refresh returns defensive snapshots", () => {
+  clearProviderEntries();
+  clearHostPresent();
+
+  const widgetCalls: Array<string[] | undefined> = [];
+  const lines = ["original line"];
+  const tags = ["original tag"];
+  const provider = registerProvider({
+    id: "refresh-snapshot-provider",
+    tags: () => tags,
+    getUpdatedAt: () => "2026-06-15T12:00:00.000Z",
+    getRenderedLines: () => ({ available: true, lines }),
+    widgetId: "refresh-snapshot-widget",
+    sink: {
+      setWidget: (_id, rendered) => {
+        widgetCalls.push(rendered ? [...rendered] : undefined);
+      },
+    },
+  });
+
+  try {
+    const returned = provider.refresh();
+    returned.providerId = "mutated-provider";
+    returned.available = false;
+    returned.lines[0] = "mutated line";
+    returned.lines.push("extra line");
+    returned.tags![0] = "mutated tag";
+    returned.tags!.push("extra tag");
+
+    clearHostPresent();
+    assert.deepEqual(widgetCalls.at(-1), ["original line"]);
+    markHostPresent();
+    assert.deepEqual(listProviderEntries()[0]?.lines, ["original line"]);
+    assert.deepEqual(listProviderEntries()[0]?.tags, ["original tag"]);
+
+    const refreshed = provider.refresh();
+    assert.equal(refreshed.providerId, "refresh-snapshot-provider");
+    assert.equal(refreshed.available, true);
+    assert.deepEqual(refreshed.lines, ["original line"]);
+    assert.deepEqual(refreshed.tags, ["original tag"]);
+
+    refreshed.lines[0] = "mutated again";
+    refreshed.tags![0] = "mutated again";
+    clearHostPresent();
+    assert.deepEqual(widgetCalls.at(-1), ["original line"]);
+    markHostPresent();
+    assert.deepEqual(listProviderEntries()[0]?.lines, ["original line"]);
+    assert.deepEqual(listProviderEntries()[0]?.tags, ["original tag"]);
+  } finally {
+    provider.stop();
+    clearProviderEntries();
+    clearHostPresent();
+  }
+});

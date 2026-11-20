@@ -76,6 +76,15 @@ function resolveProviderOption<T>(value: ProviderOptionValue<T> | undefined, fal
   return typeof value === "function" ? (value as () => T)() : value;
 }
 
+/** Returns a caller-owned copy of a normalized provider entry. */
+function snapshotProviderEntry(entry: ProviderEntry): ProviderEntry {
+  return {
+    ...entry,
+    lines: [...entry.lines],
+    tags: entry.tags ? [...entry.tags] : undefined,
+  };
+}
+
 /** Normalizes rendered widget state into availability and line arrays. */
 function resolveRenderedState(rendered: ProviderRenderedState): { available: boolean; lines: string[] } {
   if (Array.isArray(rendered)) {
@@ -192,7 +201,7 @@ export function createProviderRuntime(options: ProviderRuntimeOptions): Provider
 
       latest = normalizeProviderEntry({ ...entry, providerId });
       applyState();
-      return latest;
+      return snapshotProviderEntry(latest);
     },
     stop() {
       if (stopped) return;
