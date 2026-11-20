@@ -58,6 +58,61 @@ test("registry publishes, dedupes, lists, and removes normalized entries", () =>
   clearProviderEntries();
 });
 
+test("registry entries are isolated from caller and list mutations", () => {
+  const registry = getWidgetHostRegistry();
+  registry.clear();
+
+  const lines = ["hello"];
+  const tags = ["music"];
+
+  try {
+    registry.set({
+      providerId: "isolated",
+      available: true,
+      lines,
+      updatedAt: "2026-06-15T12:00:00.000Z",
+      tags,
+    });
+
+    lines[0] = "changed by caller";
+    lines.push("caller addition");
+    tags[0] = "changed by caller";
+    tags.push("caller addition");
+
+    assert.deepEqual(registry.list()[0], {
+      providerId: "isolated",
+      available: true,
+      lines: ["hello"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+      priority: 0,
+      tags: ["music"],
+      mode: undefined,
+      ttlMs: undefined,
+    });
+
+    const listed = registry.list()[0]!;
+    listed.providerId = "changed by consumer";
+    listed.available = false;
+    listed.lines[0] = "changed by consumer";
+    listed.lines.push("consumer addition");
+    listed.tags![0] = "changed by consumer";
+    listed.tags!.push("consumer addition");
+
+    assert.deepEqual(registry.list()[0], {
+      providerId: "isolated",
+      available: true,
+      lines: ["hello"],
+      updatedAt: "2026-06-15T12:00:00.000Z",
+      priority: 0,
+      tags: ["music"],
+      mode: undefined,
+      ttlMs: undefined,
+    });
+  } finally {
+    registry.clear();
+  }
+});
+
 test("registry remove trims ids and ignores invalid or unknown ids", () => {
   const registry = getWidgetHostRegistry();
   registry.clear();
