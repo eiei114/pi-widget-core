@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning.
 
+## 0.1.14 - 2026-11-23
+
+- chore: prepare patch release with Pi SDK 1.6.0 compatibility pins
+
 ## 0.1.13 - 2026-11-19
 
 - chore: prepare patch release with Pi SDK 1.5.2 compatibility pins
