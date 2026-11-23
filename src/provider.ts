@@ -129,15 +129,25 @@ export function registerProvider(options: RegisterProviderOptions): RegisteredPr
     : undefined;
 
   const refresh = () => runtime.update(resolveProviderUpdate(options, providerId));
+  const stop = () => {
+    disposePresenceCallback?.();
+    runtime.stop();
+  };
 
-  refresh();
+  try {
+    refresh();
+  } catch (error) {
+    try {
+      stop();
+    } catch {
+      // A sink can throw during cleanup; preserve the original refresh error.
+    }
+    throw error;
+  }
 
   return {
     refresh,
-    stop() {
-      disposePresenceCallback?.();
-      runtime.stop();
-    },
+    stop,
     getMode: () => runtime.getMode(),
     isHostPresent: () => runtime.isHostPresent(),
   };
