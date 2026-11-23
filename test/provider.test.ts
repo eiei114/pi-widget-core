@@ -163,6 +163,38 @@ test("registerProvider reads callbacks and notifies host presence changes", () =
   clearHostPresent();
 });
 
+test("registerProvider disposes presence listeners when the first refresh fails", (t) => {
+  clearProviderEntries();
+  clearHostPresent();
+  t.after(() => {
+    clearHostPresent();
+    clearProviderEntries();
+  });
+
+  const error = new Error("initial render failed");
+  const presenceChanges: boolean[] = [];
+  const widgetCalls: Array<string[] | undefined> = [];
+
+  assert.throws(() => registerProvider({
+    id: "failed-provider",
+    widgetId: "failed-widget",
+    getUpdatedAt: () => "2026-06-15T12:00:00.000Z",
+    getRenderedLines: () => {
+      throw error;
+    },
+    onHostPresenceChange: (present) => presenceChanges.push(present),
+    sink: {
+      setWidget: (_id, lines) => widgetCalls.push(lines),
+    },
+  }), (thrown) => thrown === error);
+
+  // Ignore setup and cleanup calls; transitions must not reach the failed provider.
+  widgetCalls.length = 0;
+  markHostPresent();
+  clearHostPresent();
+  assert.deepEqual({ presenceChanges, widgetCalls }, { presenceChanges: [], widgetCalls: [] });
+});
+
 test("provider runtime returns defensive snapshots of updates", () => {
   clearProviderEntries();
   clearHostPresent();
