@@ -58,6 +58,56 @@ test("registry publishes, dedupes, lists, and removes normalized entries", () =>
   clearProviderEntries();
 });
 
+test("registry preserves the last valid entry when a replacement has an invalid updatedAt", () => {
+  const registry = getWidgetHostRegistry();
+  registry.clear();
+
+  let notifications = 0;
+  const dispose = registry.subscribe(() => {
+    notifications += 1;
+  });
+
+  const initial = {
+    providerId: "demo",
+    available: true,
+    lines: ["last valid"],
+    updatedAt: "2026-06-15T12:00:00.000Z",
+  };
+  const expectedInitial = {
+    ...initial,
+    priority: 0,
+    tags: undefined,
+    mode: undefined,
+    ttlMs: undefined,
+  };
+
+  try {
+    registry.set(initial);
+    assert.deepEqual(registry.list(), [expectedInitial]);
+    assert.equal(notifications, 1);
+
+    assert.throws(() => registry.set({
+      ...initial,
+      lines: ["rejected replacement"],
+      updatedAt: "not-a-date",
+    }), /Invalid provider updatedAt value/);
+    assert.deepEqual(registry.list(), [expectedInitial]);
+    assert.equal(notifications, 1);
+
+    const replacement = {
+      ...initial,
+      lines: ["next valid"],
+      updatedAt: "2026-06-15T12:01:00.000Z",
+    };
+    registry.set(replacement);
+    assert.deepEqual(registry.list(), [{ ...expectedInitial, ...replacement }]);
+    assert.equal(notifications, 2);
+  } finally {
+    dispose();
+    registry.clear();
+  }
+});
+
 test("registry entries are isolated from caller and list mutations", () => {
   const registry = getWidgetHostRegistry();
   registry.clear();
