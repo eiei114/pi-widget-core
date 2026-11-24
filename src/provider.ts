@@ -165,7 +165,7 @@ export function createProviderRuntime(options: ProviderRuntimeOptions): Provider
 
   const renderStandalone = () => {
     if (!options.widgetId || !options.sink) return;
-    const visible = latest && latest.available && latest.lines.length > 0 ? latest.lines : undefined;
+    const visible = latest && latest.available && latest.lines.length > 0 ? [...latest.lines] : undefined;
     options.sink.setWidget(options.widgetId, visible);
   };
 
