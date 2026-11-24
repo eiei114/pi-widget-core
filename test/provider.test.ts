@@ -45,6 +45,44 @@ test("provider runtime switches between standalone render and host-owned publish
   clearHostPresent();
 });
 
+test("provider runtime isolates standalone sink mutations from updates and host publication", (t) => {
+  clearProviderEntries();
+  clearHostPresent();
+
+  const widgetCalls: Array<string[] | undefined> = [];
+  const runtime = createProviderRuntime({
+    providerId: "mutating-sink-provider",
+    widgetId: "mutating-sink-widget",
+    sink: {
+      setWidget: (_id, lines) => {
+        widgetCalls.push(lines);
+        lines?.splice(0, 1, "sink edit", "sink extra");
+      },
+    },
+  });
+  t.after(() => {
+    runtime.stop();
+    clearProviderEntries();
+    clearHostPresent();
+  });
+
+  const updatedAt = "2026-06-15T12:00:00.000Z";
+  const snapshot = runtime.update({ available: true, lines: ["original line"], updatedAt });
+  assert.deepEqual(widgetCalls.at(-1), ["sink edit", "sink extra"]);
+
+  markHostPresent();
+  assert.deepEqual({ snapshot: snapshot.lines, published: listProviderEntries()[0]?.lines }, {
+    snapshot: ["original line"],
+    published: ["original line"],
+  });
+
+  clearHostPresent();
+  assert.deepEqual(widgetCalls.at(-1), ["sink edit", "sink extra"]);
+  const callsBeforeClear = widgetCalls.length;
+  runtime.update({ available: false, lines: ["hidden line"], updatedAt });
+  assert.deepEqual(widgetCalls.slice(callsBeforeClear), [undefined]);
+});
+
 test("registerProvider adapts array output and Date timestamps for runtime updates", () => {
   clearProviderEntries();
   clearHostPresent();
